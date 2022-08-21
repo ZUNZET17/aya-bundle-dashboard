@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 
 export default function LoginForm(props) {
-  const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const router = useRouter();
   const [userData, setUserData] = useState({
     identifier: '',
@@ -12,17 +11,10 @@ export default function LoginForm(props) {
   });
 
   const handleSubmit = async (e) => {
-    console.log('submitted')
     e.preventDefault();
-    // try {
-    //   await axios.post('/api/login', { ...userData });
-    //   router.push('/discounts');
-    // } catch (err) {
-    //   console.log(err.response.data);
-    // }
     axios({
       method: 'post',
-      url: `${strapi_url}/api/login`,
+      url: `/api/login`,
       data: userData,
       headers: {
           'Content-Type': 'text/plain;charset=utf-8',

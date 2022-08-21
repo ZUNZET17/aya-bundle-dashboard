@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 
 export default function LoginForm(props) {
+  const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const router = useRouter();
   const [userData, setUserData] = useState({
     identifier: '',

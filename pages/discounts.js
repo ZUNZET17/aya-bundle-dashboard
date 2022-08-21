@@ -30,7 +30,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-const strapi_url =process.env.NEXT_PUBLIC_STRAPI_URL
+const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
 
 export default function Discounts({jwt}) {
   const router = useRouter();

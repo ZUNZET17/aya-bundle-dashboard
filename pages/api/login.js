@@ -2,10 +2,11 @@ import axios from 'axios';
 import { setCookie } from 'nookies'
 
 export default async (req, res) => {
+  const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const { password, identifier } = JSON.parse(req.body);
 
   try {
-    const postRes = await axios.post('http://localhost:1337/api/auth/local', {
+    const postRes = await axios.post(`${strapi_url}/api/auth/local`, {
       identifier,
       password,
     })

@@ -1,7 +1,13 @@
-/* This example requires Tailwind CSS v2.0+ */
 import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
+import LoginForm from '../components/login-form'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import nookies from 'nookies';
+
+
 
 const user = {
   name: 'Tom Cook',
@@ -27,16 +33,20 @@ function classNames(...classes) {
 }
 
 export default function Example() {
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  console.log('rerendered')
+  useEffect(() => {
+
+  }, [])
+
+  useEffect(() => {
+    console.log('isAdmin', isAdmin)
+    console.log('is this workinf=')
+  }, [isAdmin])
+
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           {({ open }) => (
@@ -194,7 +204,15 @@ export default function Example() {
           <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {/* Replace with your content */}
             <div className="px-4 py-6 sm:px-0">
-              <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" />
+              {
+                !isAdmin && <LoginForm setIsAdmin={setIsAdmin} isAdmin={isAdmin} />
+              }
+              {
+                isAdmin && (<div>
+                  Welcome Admin
+                  <button className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-50" onClick={() => {setIsAdmin(false); sessionStorage.setItem('adminLogged', false)}}>Logout</button>
+                  </div>)
+              }
             </div>
             {/* /End replace */}
           </div>
@@ -202,4 +220,36 @@ export default function Example() {
       </div>
     </>
   )
+}
+
+export const getServerSideProps = async (ctx) => {
+  const cookies = nookies.get(ctx)
+  let user = null;
+
+  if (cookies?.jwt) {
+    try {
+      const { data } = await axios.get('http://localhost:1337/users/me', {
+        headers: {
+          Authorization:
+            `Bearer ${cookies.jwt}`,
+          },
+      });
+      user = data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  if (user) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/discounts'
+      }
+    }
+  }
+
+  return {
+    props: {}
+  }
 }

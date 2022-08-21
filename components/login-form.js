@@ -22,7 +22,7 @@ export default function LoginForm(props) {
     // }
     axios({
       method: 'post',
-      url: 'http://localhost:3001/api/login',
+      url: `${strapi_url}/api/login`,
       data: userData,
       headers: {
           'Content-Type': 'text/plain;charset=utf-8',

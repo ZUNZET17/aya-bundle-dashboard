@@ -74,12 +74,13 @@ export default function Example() {
 }
 
 export const getServerSideProps = async (ctx) => {
+  const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const cookies = nookies.get(ctx)
   let user = null;
 
   if (cookies?.jwt) {
     try {
-      const { data } = await axios.get('http://localhost:1337/users/me', {
+      const { data } = await axios.get(`${strapi_url}/users/me`, {
         headers: {
           Authorization:
             `Bearer ${cookies.jwt}`,

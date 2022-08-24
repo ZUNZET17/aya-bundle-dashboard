@@ -3,12 +3,14 @@ import { fetchDiscounts } from "../../lib/utils"
 import axios from "axios";
 
 export default async function handler(req, res) {
+  const request = JSON.parse(req)
+
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
-  const reqBundle = req.body.bundleTitle
-  const reqVariants= req.body.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
-  const reqProducts = req.body.bundleProducts.map(v => `gid://shopify/Product/${v}`)
-  const reqTotalAmount = req.body.totalAmount
+  const reqBundle = request.body.bundleTitle
+  const reqVariants= request.body.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
+  const reqProducts = request.body.bundleProducts.map(v => `gid://shopify/Product/${v}`)
+  const reqTotalAmount = request.body.totalAmount
   const url = `${strapi_url}/api/discount-lists`
 
   const discountRules = await axios.get(url)
@@ -19,7 +21,7 @@ export default async function handler(req, res) {
   const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
 
   if (!reqProducts.every(x => discountProducts.includes(x))){
-    return res.status(400).json({message: 'Fuck YOu!'})
+    return res.status(400).json({message: 'Invalid Data'})
   }
   const discountAmount = discountRule.attributes.amount
   const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toString()

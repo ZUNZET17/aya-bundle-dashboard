@@ -5,16 +5,24 @@ import axios from "axios";
 export default async function handler(req, res) {
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
-  const reqBundle = req.body.bundle
+  const reqBundle = req.body.bundleTitle
+  const reqVariants= req.body.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
+  const reqProducts = req.body.bundleProducts.map(v => `gid://shopify/Product/${v}`)
+  const reqTotalAmount = req.body.totalAmount
   const url = `${strapi_url}/api/discount-lists`
-  console.log(url)
+
   const discountRules = await axios.get(url)
     .then(res => res.data.data)
     .catch(err => err)
   
   const discountRule = discountRules.filter(d => d.attributes.bundle ==  reqBundle)[0]
   const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
-  const discountAmount = (discountRule.attributes.amount).toString()
+
+  if (!reqProducts.every(x => discountProducts.includes(x))){
+    return res.status(400).json({message: 'Fuck YOu!'})
+  }
+  const discountAmount = discountRule.attributes.amount
+  const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toString()
   const discountTitle = discountRule.attributes.title
   const discountCode = discountRule.attributes.code + '-' + (Date.now() / Math.random()).toString().slice(0, 6)
   const discountMinimumQty = (discountRule.attributes.minimum).toString()
@@ -75,14 +83,14 @@ export default async function handler(req, res) {
         "customerGets": {
           "value": {
             "discountAmount": {
-                "amount": discountAmount,
+                "amount": percentageAmount,
                 "appliesOnEachItem": false
             }
           },
           "items": {
             "all": false,
             "products": {
-                "productsToAdd": discountProducts
+                "productVariantsToAdd": reqVariants
             }
           }
         },
@@ -104,11 +112,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({ message: 'there was a problem creating the discount.' })
     })
   }
-  
+
   return res.status(201).json({
     statusCode: 201,
     body: JSON.stringify({
-      data: data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code
+      data: data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code,
     })
   });
   

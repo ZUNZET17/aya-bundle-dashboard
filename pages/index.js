@@ -33,17 +33,6 @@ function classNames(...classes) {
 }
 
 export default function Example() {
-  const [isAdmin, setIsAdmin] = useState(false)
-
-  console.log('rerendered')
-  useEffect(() => {
-
-  }, [])
-
-  useEffect(() => {
-    console.log('isAdmin', isAdmin)
-    console.log('is this workinf=')
-  }, [isAdmin])
 
   return (
     <>
@@ -56,15 +45,7 @@ export default function Example() {
           <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {/* Replace with your content */}
             <div className="px-4 py-6 sm:px-0">
-              {
-                !isAdmin && <LoginForm setIsAdmin={setIsAdmin} isAdmin={isAdmin} />
-              }
-              {
-                isAdmin && (<div>
-                  Welcome Admin
-                  <button className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-50" onClick={() => {setIsAdmin(false); sessionStorage.setItem('adminLogged', false)}}>Logout</button>
-                  </div>)
-              }
+              <LoginForm />
             </div>
             {/* /End replace */}
           </div>

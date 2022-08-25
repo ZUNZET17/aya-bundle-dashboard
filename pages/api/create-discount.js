@@ -3,8 +3,11 @@ import { fetchDiscounts } from "../../lib/utils"
 import axios from "axios";
 
 export default async function handler(req, res) {
-  const request = JSON.parse(req.body)
-  console.log(request)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+  }
+
+  const request = req.body
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
   const reqBundle = request.bundleTitle
@@ -23,6 +26,7 @@ export default async function handler(req, res) {
   if (!reqProducts.every(x => discountProducts.includes(x))){
     return res.status(400).json({message: 'Invalid Data'})
   }
+  
   const discountAmount = discountRule.attributes.amount
   const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toString()
   const discountTitle = discountRule.attributes.title
@@ -115,10 +119,10 @@ export default async function handler(req, res) {
     })
   }
 
-  return res.status(201).json({
-    statusCode: 201,
+  return res.status(200).json({
+    statusCode: 200,
     body: JSON.stringify({
-      data: data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code,
+      data: data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code
     })
   });
   

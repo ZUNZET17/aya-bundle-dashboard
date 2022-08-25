@@ -1,11 +1,15 @@
 import { shopifyAdminGqlRequest } from "../../lib/shopify";
 import { fetchDiscounts } from "../../lib/utils"
 import axios from "axios";
+import NextCors from 'nextjs-cors';
 
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-  }
+  await NextCors(req, res, {
+    // Options
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  });
 
   const request = req.body
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL

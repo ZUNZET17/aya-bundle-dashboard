@@ -168,8 +168,8 @@ export default function Discounts({jwt}) {
         <details className="border-t border-gray-200">
           <summary className="bg-slate-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 cursor-pointer hover:bg-slate-200">
             <dt className="text-sm font-medium text-black">{i + 1}</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0">{d.attributes.title}</dd>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0">{d.attributes.bundle}</dd>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0"><strong>Discount Title:</strong> <br/>{d.attributes.title}</dd>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0"><strong>Bundle Product Title:</strong> <br/>{d.attributes.bundle}</dd>
           </summary>
           <dl>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

@@ -3,14 +3,14 @@ import { fetchDiscounts } from "../../lib/utils"
 import axios from "axios";
 
 export default async function handler(req, res) {
-  const request = JSON.parse(req)
-
+  const request = JSON.parse(req.body)
+  console.log(request)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
-  const reqBundle = request.body.bundleTitle
-  const reqVariants= request.body.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
-  const reqProducts = request.body.bundleProducts.map(v => `gid://shopify/Product/${v}`)
-  const reqTotalAmount = request.body.totalAmount
+  const reqBundle = request.bundleTitle
+  const reqVariants= request.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
+  const reqProducts = request.bundleProducts.map(v => `gid://shopify/Product/${v}`)
+  const reqTotalAmount = request.totalAmount
   const url = `${strapi_url}/api/discount-lists`
 
   const discountRules = await axios.get(url)

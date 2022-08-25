@@ -564,7 +564,7 @@ export function DiscountModal(props) {
                       )} id='discount-amount' type="text" value={discount.data.title} required/>
                     </div>
                     <div className="add-dicount-form__field flex flex-col">
-                      <label htmlFor="discount-amount" className="add-discount__label">Bundle</label>
+                      <label htmlFor="discount-amount" className="add-discount__label">Bundle Product Title</label>
                       <input onChange={e => setDiscount(
                         { 
                           data: { 

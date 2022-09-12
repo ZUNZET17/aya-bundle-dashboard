@@ -6,12 +6,12 @@ import NextCors from 'nextjs-cors';
 export default async function handler(req, res) {
   await NextCors(req, res, {
     // Options
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    methods: ['GET', 'POST'],
     origin: '*',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
 
-  const request = JSON.parse(req.body)
+  const request = req.body
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
   const reqBundle = request.bundleTitle

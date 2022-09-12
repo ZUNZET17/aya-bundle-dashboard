@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
 
-  const request = req.body
+  const request = JSON.parse(req.body)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
   const reqBundle = request.bundleTitle
@@ -23,7 +23,6 @@ export default async function handler(req, res) {
   const discountRules = await axios.get(url)
     .then(res => res.data.data)
     .catch(err => err)
-  
   const discountRule = discountRules.filter(d => d.attributes.bundle ==  reqBundle)[0]
   const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
 
@@ -120,6 +119,13 @@ export default async function handler(req, res) {
     return res.status(500).json({
       statusCode: 500,
       body: JSON.stringify({ message: 'there was a problem creating the discount.' })
+    })
+  }
+
+  if (data.data.userErrors) {
+    return res.status(500).json({
+      statusCode: 500,
+      body: JSON.stringify({ message: data.data.userErrors })
     })
   }
 

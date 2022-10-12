@@ -1,7 +1,11 @@
-import { shopifyAdminGqlRequest } from "../../lib/shopify";
+import { shopifyAdminGqlRequest, loadProducts } from "../../lib/shopify";
 import { fetchDiscounts } from "../../lib/utils"
 import axios from "axios";
 import NextCors from 'nextjs-cors';
+
+const stores = {
+  "www.ecoaya.com": "aya-us-discounts"
+}
 
 export default async function handler(req, res) {
   await NextCors(req, res, {
@@ -10,19 +14,25 @@ export default async function handler(req, res) {
     origin: '*',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
-
-  const request = req.body
+  
+  const request = JSON.parse(req.body)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
+  const storeEndPoint = stores[request.storeName]
   const reqBundle = request.bundleTitle
   const reqVariants= request.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
+  const variantsTotal = await loadProducts(reqVariants)
+  let totalBundlePrice = 0
+  for (let x in variantsTotal.data) {
+    totalBundlePrice += Number(variantsTotal.data[x].price)
+  }
   const reqProducts = request.bundleProducts.map(v => `gid://shopify/Product/${v}`)
-  const reqTotalAmount = request.totalAmount
-  const url = `${strapi_url}/api/discount-lists`
-
+  const reqTotalAmount = totalBundlePrice
+  const url = `${strapi_url}/api/${storeEndPoint}`
   const discountRules = await axios.get(url)
     .then(res => res.data.data)
     .catch(err => err)
+
   const discountRule = discountRules.filter(d => d.attributes.bundle ==  reqBundle)[0]
   const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
 
@@ -31,7 +41,7 @@ export default async function handler(req, res) {
   }
   
   const discountAmount = discountRule.attributes.amount
-  const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toString()
+  const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toFixed(2)
   const discountTitle = discountRule.attributes.title
   const discountCode = discountRule.attributes.code + '-' + (Date.now() / Math.random()).toString().slice(0, 6)
   const discountMinimumQty = (discountRule.attributes.minimum).toString()

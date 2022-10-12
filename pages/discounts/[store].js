@@ -5,8 +5,8 @@ import { useEffect, useState, Fragment } from 'react';
 import axios from 'axios';
 import nookies from 'nookies';
 import { parseCookies, setCookie }  from 'nookies'
-import { fetchDiscounts } from '../lib/utils'
-import { shopifyGqlRequest, loadSearchResults } from '../lib/shopify'
+import { fetchDiscounts } from '../../lib/utils'
+import { shopifyGqlRequest, loadSearchResults } from '../../lib/shopify'
 
 const user = {
   name: 'Aya admin',
@@ -34,6 +34,7 @@ const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
 
 export default function Discounts({jwt}) {
   const router = useRouter();
+  const { store } = router.query
   const [discount, setDiscount] = useState({
     data: {
       bundle:'',
@@ -62,7 +63,7 @@ export default function Discounts({jwt}) {
     setSearchProducts([])
     axios({
       method: 'post',
-      url: `${strapi_url}/api/discount-lists`,
+      url: `${strapi_url}/api/${store}`,
       data: discount,
       headers: {
           Authorization: `Bearer ${jwt}`,
@@ -95,7 +96,7 @@ export default function Discounts({jwt}) {
       }
     }
     try {
-      await axios.delete(`${strapi_url}/api/discount-lists/` + idx, config);
+      await axios.delete(`${strapi_url}/api/${store}/` + idx, config);
       loadDiscounts()
     } catch (err) {
       console.log(err.response.data);
@@ -104,8 +105,9 @@ export default function Discounts({jwt}) {
   }
 
   const loadDiscounts = async () => {
-    const data = await fetchDiscounts(jwt);
+    const data = await fetchDiscounts(jwt, store);
     setDiscountsArr(data)
+    console.log('data', data, store)
   }
 
   useEffect(() => {
@@ -441,19 +443,17 @@ export default function Discounts({jwt}) {
 
         <header className="bg-white shadow">
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard {store}</h1>
           </div>
         </header>
         <main>
           <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Discounts</h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">Current Discounts</p>
-            </div>
-            {/* Discounts Array */}
-            { discountsArray }
-            {/* /End Discounts Array */}
-            <DiscountModal 
+            <div className="px-4 py-5 sm:px-6 flex justify-between">
+              <div className="flex flex-col">
+                <h3 className="text-lg max-w-max leading-6 font-medium text-gray-900">Discounts</h3>
+                <p className="mt-1 max-w-max text-sm text-gray-500">Current Discounts</p>
+              </div>
+              <DiscountModal 
             discount={discount} 
             setDiscount={setDiscount} 
             searchProductsResult={searchProductsResult}
@@ -462,6 +462,10 @@ export default function Discounts({jwt}) {
             queryProducts={queryProducts}
             setSearchProducts={setSearchProducts}
              />
+            </div>
+            {/* Discounts Array */}
+            { discountsArray }
+            {/* /End Discounts Array */}
           </div>
         </main>
       </div> 

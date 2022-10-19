@@ -4,29 +4,66 @@ import axios from "axios";
 import NextCors from 'nextjs-cors';
 
 const stores = {
-  "www.ecoaya.com": "aya-us-discounts"
+  'www.ecoaya.com': {
+    'endpoint': 'aya-us-discounts',
+    'store_name': 'Ecoaya-US',
+    'store_url': 'www.ecoaya.com',
+    'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AYA_US,
+    'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AYA_US,
+    'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AYA_US,
+    'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AYA_US
+  },
+  'www.ecoaya.eu': {
+    'endpoint': 'aya-eu-discounts',
+    'store_name': 'Ecoaya-EU',
+    'store_url': 'www.ecoaya.eu',
+    'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AYA_EU,
+    'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AYA_EU,
+    'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AYA_EU,
+    'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AYA_EU
+  },
+  'www.armsofandes.com': {
+    'endpoint': 'aoa-us-discounts',
+    'store_name': 'AOA-US',
+    'store_url': 'www.armsofandes.com',
+    'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_US,
+    'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_US,
+    'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_US,
+    'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AOA_US
+  },
+  'www.armsofandes.eu': {
+    'endpoint': 'aoa-eu-discounts',
+    'store_name': 'AOA-EU',
+    'store_url': 'www.armsofandes.eu',
+    'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_EU,
+    'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_EU,
+    'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_EU,
+    'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AOA_EU
+  }
 }
 
 export default async function handler(req, res) {
   await NextCors(req, res, {
     // Options
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
     origin: '*',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
   
-  const request = req.body
+  const requestBody = req.body
+  // const requestBody = JSON.parse(requestData)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
-  const storeEndPoint = stores[request.storeName]
-  const reqBundle = request.bundleTitle
-  const reqVariants= request.selectedVariants.map(v => `gid://shopify/ProductVariant/${v}`)
-  const variantsTotal = await loadProducts(reqVariants)
+  const storeEndPoint = stores[requestBody.storeName]
+  const reqBundle = requestBody.bundleTitle
+  const reqVariants= requestBody.selectedVariants.map(v => `gid:\/\/shopify\/ProductVariant\/${v}`)
+  console.log('endpoint', stores[storeEndPoint].endpoint)
+  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v}"`), stores[storeEndPoint])
   let totalBundlePrice = 0
   for (let x in variantsTotal.data) {
     totalBundlePrice += Number(variantsTotal.data[x].price)
   }
-  const reqProducts = request.bundleProducts.map(v => `gid://shopify/Product/${v}`)
+  const reqProducts = requestBody.bundleProducts.map(v => `gid:\/\/shopify\/Product\/${v}`)
   const reqTotalAmount = totalBundlePrice
   const url = `${strapi_url}/api/${storeEndPoint}`
   const discountRules = await axios.get(url)
@@ -35,7 +72,6 @@ export default async function handler(req, res) {
 
   const discountRule = discountRules.filter(d => d.attributes.bundle ==  reqBundle)[0]
   const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
-
   if (!reqProducts.every(x => discountProducts.includes(x))){
     return res.status(400).json({message: 'Invalid Data'})
   }

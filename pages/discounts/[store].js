@@ -7,6 +7,7 @@ import nookies from 'nookies';
 import { parseCookies, setCookie }  from 'nookies'
 import { fetchDiscounts } from '../../lib/utils'
 import { shopifyGqlRequest, loadSearchResults } from '../../lib/shopify'
+import { storesInfo } from '../../data/storesInfo';
 
 const user = {
   name: 'Aya admin',
@@ -34,7 +35,7 @@ const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
 
 export default function Discounts({jwt}) {
   const router = useRouter();
-  const { store } = router.query
+  const store = storesInfo[router.query.store]
   const [discount, setDiscount] = useState({
     data: {
       bundle:'',
@@ -63,7 +64,7 @@ export default function Discounts({jwt}) {
     setSearchProducts([])
     axios({
       method: 'post',
-      url: `${strapi_url}/api/${store}`,
+      url: `${strapi_url}/api/${store.endpoint}`,
       data: discount,
       headers: {
           Authorization: `Bearer ${jwt}`,
@@ -96,7 +97,7 @@ export default function Discounts({jwt}) {
       }
     }
     try {
-      await axios.delete(`${strapi_url}/api/${store}/` + idx, config);
+      await axios.delete(`${strapi_url}/api/${store.endpoint}/` + idx, config);
       loadDiscounts()
     } catch (err) {
       console.log(err.response.data);
@@ -105,9 +106,9 @@ export default function Discounts({jwt}) {
   }
 
   const loadDiscounts = async () => {
-    const data = await fetchDiscounts(jwt, store);
+    const data = await fetchDiscounts(jwt, store.endpoint);
     setDiscountsArr(data)
-    console.log('data', data, store)
+    console.log('data', data, store.endpoint)
   }
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function Discounts({jwt}) {
 
   const queryProducts = async (qry, event) => {
     event.preventDefault()
-    const data = await loadSearchResults(qry)
+    const data = await loadSearchResults(qry, store)
     data.products?.edges && setSearchProducts(data.products.edges
       .map(e => e.node)
     )
@@ -443,7 +444,7 @@ export default function Discounts({jwt}) {
 
         <header className="bg-white shadow">
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard {store}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard {store.store_name}</h1>
           </div>
         </header>
         <main>
@@ -679,12 +680,12 @@ export async function getServerSideProps(ctx) {
 
   if (jwt) {
 
-  return {
-    props: {
-      jwt: jwt,    
+    return {
+      props: {
+        jwt: jwt,    
+      }
     }
   }
-}
 
  // if there isn’t a jwt token go home  
 

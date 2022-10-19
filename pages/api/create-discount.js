@@ -54,11 +54,11 @@ export default async function handler(req, res) {
   // const requestBody = JSON.parse(requestData)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
-  const storeEndPoint = stores[requestBody.storeName]
+  const store = stores[requestBody.storeName]
+  const storeEndPoint = store.endpoint
   const reqBundle = requestBody.bundleTitle
   const reqVariants= requestBody.selectedVariants.map(v => `gid:\/\/shopify\/ProductVariant\/${v}`)
-  console.log('endpoint', stores[storeEndPoint].endpoint)
-  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v}"`), stores[storeEndPoint])
+  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v}"`), store)
   let totalBundlePrice = 0
   for (let x in variantsTotal.data) {
     totalBundlePrice += Number(variantsTotal.data[x].price)
@@ -157,7 +157,8 @@ export default async function handler(req, res) {
         "appliesOncePerCustomer": false,
         "usageLimit": 100
       }
-    }
+    },
+    storeData: store
 
   });
 

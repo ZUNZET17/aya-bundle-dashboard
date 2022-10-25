@@ -57,11 +57,12 @@ export default async function handler(req, res) {
   const store = stores[requestBody.storeName]
   const storeEndPoint = store.endpoint
   const reqBundle = requestBody.bundleTitle
-  const reqVariants= requestBody.selectedVariants.map(v => `gid:\/\/shopify\/ProductVariant\/${v}`)
-  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v}"`), store)
+  const reqVariants= requestBody.selectedVariants.map(v => ({gid: `gid:\/\/shopify\/ProductVariant\/${v.id}`, qty: v.qty}))
+  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v.gid}"`), store)
   let totalBundlePrice = 0
   for (let x in variantsTotal.data) {
-    totalBundlePrice += Number(variantsTotal.data[x].price)
+    let currVariant = reqVariants.find(v => v.gid == variantsTotal.data[x].id)
+    totalBundlePrice += ( Number(variantsTotal.data[x].price) * currVariant.qty )
   }
   const reqProducts = requestBody.bundleProducts.map(v => `gid:\/\/shopify\/Product\/${v}`)
   const reqTotalAmount = totalBundlePrice
@@ -145,7 +146,7 @@ export default async function handler(req, res) {
           "items": {
             "all": false,
             "products": {
-                "productVariantsToAdd": reqVariants
+                "productVariantsToAdd": reqVariants.map(v => v.gid)
             }
           }
         },
@@ -169,10 +170,10 @@ export default async function handler(req, res) {
     })
   }
 
-  if (data.data.userErrors) {
+  if (data.errors) {
     return res.status(500).json({
       statusCode: 500,
-      body: JSON.stringify({ message: data.data.userErrors })
+      body: JSON.stringify({ message: data.errors })
     })
   }
 

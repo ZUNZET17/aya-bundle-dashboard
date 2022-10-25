@@ -56,7 +56,7 @@ export default function Discounts() {
           <div className="bg-slate-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 cursor-pointer hover:bg-slate-200">
             <dt className="text-sm font-medium text-black">{i + 1}</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0"><strong>Store:</strong> <br/>{s.store_name}</dd>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0"><strong>Bundle Product Title:</strong> <br/>{s.endpoint}</dd>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0"><strong>Store Endpoint:</strong> <br/>{s.endpoint}</dd>
           </div>
         </Link>
       </div>

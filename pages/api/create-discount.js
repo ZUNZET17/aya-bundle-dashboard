@@ -22,19 +22,19 @@ const stores = {
     'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AYA_EU,
     'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AYA_EU
   },
-  'www.armsofandes.com': {
+  'armsofandes.com': {
     'endpoint': 'aoa-us-discounts',
     'store_name': 'AOA-US',
-    'store_url': 'www.armsofandes.com',
+    'store_url': 'armsofandes.com',
     'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_US,
     'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_US,
     'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_US,
     'admin_token_env': process.env.NEXT_PUBLIC_SHOPIFY_ADMIN_ACCESSTOKEN_AOA_US
   },
-  'www.armsofandes.eu': {
+  'armsofandes.eu': {
     'endpoint': 'aoa-eu-discounts',
     'store_name': 'AOA-EU',
-    'store_url': 'www.armsofandes.eu',
+    'store_url': 'armsofandes.eu',
     'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_EU,
     'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_EU,
     'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_EU,
@@ -49,7 +49,6 @@ export default async function handler(req, res) {
     origin: '*',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
-  
   const requestBody = req.body
   // const requestBody = JSON.parse(requestData)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL

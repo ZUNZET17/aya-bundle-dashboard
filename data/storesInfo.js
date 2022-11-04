@@ -20,7 +20,7 @@ export const storesInfo = {
   'aoa-us-discounts': {
     'endpoint': 'aoa-us-discounts',
     'store_name': 'AOA-US',
-    'store_url': 'www.armsofandes.com',
+    'store_url': 'armsofandes.com',
     'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_US,
     'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_US,
     'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_US,
@@ -29,7 +29,7 @@ export const storesInfo = {
   'aoa-eu-discounts': {
     'endpoint': 'aoa-eu-discounts',
     'store_name': 'AOA-EU',
-    'store_url': 'www.armsofandes.eu',
+    'store_url': 'armsofandes.eu',
     'storefront_env': process.env.NEXT_PUBLIC_STOREFRONT_API_URL_AOA_EU,
     'admin_env': process.env.NEXT_PUBLIC_ADMIN_API_URL_AOA_EU,
     'storefront_token_env': process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESSTOKEN_AOA_EU,

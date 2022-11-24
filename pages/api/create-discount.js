@@ -135,6 +135,11 @@ export default async function handler(req, res) {
         "customerSelection": {
           "all": true
         },
+        "combinesWith": {
+          "orderDiscounts": true,
+          "productDiscounts": true,
+          "shippingDiscounts": true
+        },
         "customerGets": {
           "value": {
             "discountAmount": {

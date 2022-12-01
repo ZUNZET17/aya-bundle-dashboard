@@ -55,51 +55,24 @@ export default async function handler(req, res) {
   const date = new Date(Date.now())
   const store = stores[requestBody.storeName]
   const storeEndPoint = store.endpoint
-  const reqBundle = requestBody.bundleTitle
-  const reqVariants= requestBody.selectedVariants.map(v => ({gid: `gid:\/\/shopify\/ProductVariant\/${v.id}`, qty: v.qty}))
-  const variantsTotal = await loadProducts(reqVariants.map(v => `"${v.gid}"`), store)
-  let totalBundlePrice = 0
-  for (let x in variantsTotal.data) {
-    let currVariant = reqVariants.find(v => v.gid == variantsTotal.data[x].id)
-    totalBundlePrice += ( Number(variantsTotal.data[x].price) * currVariant.qty )
-  }
-  const reqProducts = requestBody.bundleProducts.map(v => `gid:\/\/shopify\/Product\/${v}`)
-  const reqTotalAmount = totalBundlePrice
   const url = `${strapi_url}/api/${storeEndPoint}`
-  const discountRules = await axios.get(url)
-    .then(res => res.data.data)
-    .catch(err => err)
-
-  const discountRule = discountRules.filter(d => d.attributes.bundle ==  reqBundle)[0]
-  const discountProducts = discountRule.attributes.products.selectedProducts.map(p => p.id)
-  if (!reqProducts.every(x => discountProducts.includes(x))){
-    return res.status(400).json({message: 'Invalid Data'})
-  }
-  
-  const discountAmount = discountRule.attributes.amount
-  const percentageAmount =  ( (reqTotalAmount / 100) * discountAmount ).toFixed(2)
-  const discountTitle = discountRule.attributes.title
-  const discountCode = discountRule.attributes.code + '-' + (Date.now() / Math.random()).toString().slice(0, 6)
-  const discountMinimumQty = (discountRule.attributes.minimum).toString()
 
   const data = await shopifyAdminGqlRequest({
     query: `
-    mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
-      discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
-        codeDiscountNode {
-          codeDiscount {
-            ... on DiscountCodeBasic {
-              title
-              codes(first:10) {
-                nodes {
-                  code
-                }
-              }
+    mutation discountAutomaticBasicCreate($automaticBasicDiscount: DiscountAutomaticBasicInput!) {
+      discountAutomaticBasicCreate(automaticBasicDiscount: $automaticBasicDiscount) {
+        automaticDiscountNode {
+          id
+          automaticDiscount {
+            ... on DiscountAutomaticBasic {
               startsAt
               endsAt
-              customerSelection {
-                ... on DiscountCustomerAll {
-                  allCustomers
+              minimumRequirement {
+                ... on DiscountMinimumSubtotal {
+                  greaterThanOrEqualToSubtotal {
+                    amount
+                    currencyCode
+                  }
                 }
               }
               combinesWith {
@@ -109,9 +82,9 @@ export default async function handler(req, res) {
               }
               customerGets {
                 value {
-                  ... on DiscountPercentage {
+                    ... on DiscountPercentage {
                     percentage
-                  }
+                    }
                 }
                 items {
                   ... on AllDiscountItems {
@@ -119,7 +92,6 @@ export default async function handler(req, res) {
                   }
                 }
               }
-              appliesOncePerCustomer
             }
           }
         }
@@ -132,13 +104,14 @@ export default async function handler(req, res) {
     }
     `,
     variables: {
-      "basicCodeDiscount": {
-        "title": discountTitle,
-        "code": discountCode,
+      "automaticBasicDiscount": {
+        "title": requestBody.discountTitle,
         "startsAt": date.toISOString(),
-        "endsAt": (new Date(Date.now() + (3600 * 1000 * 24))).toISOString(),
-        "customerSelection": {
-          "all": true
+        "endsAt": null,
+        "minimumRequirement": {
+            "quantity": {
+            "greaterThanOrEqualToQuantity": requestBody.minimum
+            }
         },
         "combinesWith": {
           "orderDiscounts": false,
@@ -147,22 +120,15 @@ export default async function handler(req, res) {
         },
         "customerGets": {
           "value": {
-            "percentage": percentageAmount
+            "percentage": (requestBody.amount / 100)
           },
           "items": {
             "all": false,
             "products": {
-                "productVariantsToAdd": reqVariants.map(v => v.gid)
+                "productsToAdd": requestBody.productsToAdd.map(v => v.id)
             }
           }
-        },
-        "minimumRequirement": {
-          "quantity": {
-            "greaterThanOrEqualToQuantity": discountMinimumQty
-          }
-        },
-        "appliesOncePerCustomer": false,
-        "usageLimit": 100
+        }
       }
     },
     storeData: store
@@ -186,9 +152,8 @@ export default async function handler(req, res) {
   return res.status(200).json({
     statusCode: 200,
     body: JSON.stringify({
-      discountCode: data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code,
-      discountTitle: discountTitle,
-      amount: discountAmount
+      message: 'success',
+      data: data
     })
   });
   

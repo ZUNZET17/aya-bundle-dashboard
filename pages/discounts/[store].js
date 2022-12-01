@@ -6,7 +6,7 @@ import axios from 'axios';
 import nookies from 'nookies';
 import { parseCookies, setCookie }  from 'nookies'
 import { fetchDiscounts } from '../../lib/utils'
-import { shopifyGqlRequest, loadSearchResults } from '../../lib/shopify'
+import { shopifyGqlRequest, loadSearchResults, shopifyAdminGqlRequest, createAutomaticBasicDiscount } from '../../lib/shopify'
 import { storesInfo } from '../../data/storesInfo';
 
 const user = {
@@ -462,6 +462,7 @@ export default function Discounts({jwt}) {
             addDiscount={addDiscount}
             queryProducts={queryProducts}
             setSearchProducts={setSearchProducts}
+            store={store}
              />
             </div>
             {/* Discounts Array */}
@@ -483,6 +484,7 @@ export function DiscountModal(props) {
   const addDiscount = props.addDiscount
   const queryProducts = props.queryProducts
   const setSearchProducts = props.setSearchProducts
+  const storeData = props.store
 
   function closeModal() {
     setIsOpen(false)
@@ -492,7 +494,39 @@ export function DiscountModal(props) {
     setIsOpen(true)
   }
 
+  const createAutomaticBasicDiscount = async function(data) {
+    console.log('creating automatic discount')
+    const bundleData = {
+      storeName: storeData.store_url,
+      productsToAdd: discount.data.products.selectedProducts,
+      amount: discount.data.amount,
+      discountTitle: discount.data.title,
+      minimum: discount.data.minimum
+    }
+    console.log('bundleData', bundleData)
+    const response = await fetch('/api/create-automatic-discount', {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(bundleData),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+    }).then(res => {
+      console.log('res', res)
+      return res.json()
+    }).catch(error => {
+      console.log(error)
+      alert('There was a problem creating the discount!')
+      return error
+    })
+
+    return response
+
+  }
+
   const addNewDiscount = () => {
+    createAutomaticBasicDiscount()
     addDiscount()
     closeModal()
   }

@@ -51,6 +51,7 @@ export default async function handler(req, res) {
   });
   const requestBody = req.body
   // const requestBody = JSON.parse(requestData)
+  console.log('requestBody', requestBody)
   const strapi_url = process.env.NEXT_PUBLIC_STRAPI_URL
   const date = new Date(Date.now())
   const store = stores[requestBody.storeName]
@@ -147,7 +148,10 @@ export default async function handler(req, res) {
         },
         "customerGets": {
           "value": {
-            "percentage": percentageAmount
+            "discountAmount": {
+                "amount": percentageAmount,
+                "appliesOnEachItem": false
+            }
           },
           "items": {
             "all": false,
@@ -182,7 +186,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({ message: data.errors })
     })
   }
-
+  console.log('data', data.data.discountCodeBasicCreate.userErrors)
+  console.log('discountCode', data.data.discountCodeBasicCreate.codeDiscountNode.codeDiscount.codes.nodes[0].code)
   return res.status(200).json({
     statusCode: 200,
     body: JSON.stringify({
